@@ -1,0 +1,92 @@
+function getCookie(cookieName) {
+    var arg = cookieName + '='
+    var alen = arg.length
+    var clen = document.cookie.length
+    var i = 0
+    while (i < clen) {
+        var j = i + alen
+        if (document.cookie.substring(i, j) == arg) {
+            var endstr = document.cookie.indexOf(';', j)
+            if (endstr == -1) {
+                endstr = document.cookie.length
+            }
+            var ret = unescape(document.cookie.substring(j, endstr))
+            if (ret != '') {
+                return ret
+            }
+        }
+        i = document.cookie.indexOf(' ', i) + 1
+        if (i == 0) break
+    }
+    return ''
+}
+
+function getCookieLang() {
+    let data = getCookie('BITGET_LOCAL_COOKIE') ? JSON.parse(getCookie('BITGET_LOCAL_COOKIE')) : ''
+    if (data) {
+        return data['bitget_lang']
+    }
+    return 'en'
+}
+
+// 判断ie版本方法
+window.IEVersion = (function() {
+    var userAgent = navigator.userAgent // 取得浏览器的userAgent字符串
+    var isIE = userAgent.indexOf('compatible') > -1 && userAgent.indexOf('MSIE') > -1 // 判断是否IE<11浏览器
+    var isEdge = userAgent.indexOf('Edge') > -1 && !isIE // 判断是否IE的Edge浏览器
+    var isIE11 = userAgent.indexOf('Trident') > -1 && userAgent.indexOf('rv:11.0') > -1
+    if (isIE) {
+        var reIE = new RegExp('MSIE (\\d+\\.\\d+);')
+        reIE.test(userAgent)
+        var fIEVersion = parseFloat(RegExp['$1'])
+        if (fIEVersion == 7) {
+            return 7
+        } else if (fIEVersion == 8) {
+            return 8
+        } else if (fIEVersion == 9) {
+            return 9
+        } else if (fIEVersion == 10) {
+            return 10
+        } else {
+            return 6 // IE版本<=7
+        }
+    } else if (isEdge) {
+        return 'edge' // edge
+    } else if (isIE11) {
+        return 11 // IE11
+    } else {
+        return -1 // 不是ie浏览器
+    }
+})()
+
+// 展示全局loading
+window.onload = function() {
+    try {
+        // location.href.indexOf('swap') == -1 &&
+        // location.href.indexOf('game') == -1 &&
+        // location.href.indexOf('act_new') == -1 &&
+        // location.href.indexOf('convert') == -1 && // 解决不了h5加载遮挡稳定，产品要求闪兑页面要求不加载客服
+        // location.href.indexOf('jump') == -1 // 刷量页面要求不加载客服
+
+        // 这几个页面因历史原因不加载客服（优化写法）
+        if (
+            !['swap', 'game', 'act_new', 'convert', 'jump'].find((item) =>
+                location.href.includes(item)
+            )
+        ) {
+            // ada机器人入口-(替换原客服入口)
+            ;((d, w) => {
+                var s = d.createElement('script')
+                s.id = '__ada'
+                s.src = 'https://static.ada.support/embed2.js'
+                s.setAttribute('data-handle', 'bitget')
+                s.addEventListener('error', function(e) {
+                    console.log('Ada Load Error:', e)
+                })
+                d.body.appendChild(s)
+            })(document, window)
+        }
+    } catch (err) {
+        console.log('Ada Load Error:', err)
+    }
+}
